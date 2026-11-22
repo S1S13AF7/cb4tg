@@ -6,7 +6,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
 
 require_once(__DIR__ . '/db/db.php');
 
-################################################################################
+########################################################################
 
 function cb_error($msg, $code = 1) {
 	echo json_encode([
@@ -16,6 +16,10 @@ function cb_error($msg, $code = 1) {
 		]
 	], JSON_UNESCAPED_UNICODE);
 	exit;
+}
+
+if (!preg_match('/^[a-zA-Z][a-zA-Z0-9]{7,}$/', $secret)) {
+	cb_error('bad secret format', 3);
 }
 
 function cb_ok($data = 'ok') {
