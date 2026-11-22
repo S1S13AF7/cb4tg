@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS `tg_bot_users` (
 	`f_time` int(11) UNSIGNED NOT NULL DEFAULT 0,
 	`m_time` int(11) UNSIGNED NOT NULL DEFAULT 0,
 	`secret` varchar(50) NOT NULL DEFAULT '',
+	`title` text CHARACTER SET utf8mb4 NOT NULL DEFAULT,
 	`trusted` enum('0','1') NOT NULL DEFAULT '0',
 	PRIMARY KEY (`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
