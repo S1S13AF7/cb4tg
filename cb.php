@@ -102,6 +102,8 @@ if (!$handler) {
 }
 
 if ($method === 'ping') {
+if(!empty($object['check_auth'])) 
+{ cb_require_trusted($userbot); }
 	require_once($handler);
 	exit;
 }
