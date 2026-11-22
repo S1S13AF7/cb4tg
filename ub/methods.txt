@@ -1,3 +1,4 @@
 #методи:					метод
 ping						ping
-#bind						bind
+bind						bind
+signal						signal
