@@ -1,8 +1,10 @@
 <?php
 cb_require_trusted($userbot);
-# бінд чата по аналогії з iris-callback-api (вкрадено не повністю але суть та ж)
+# бінд чата по аналогії з iris-callback-api
 
-$code = isset($object['chat']) ? strtolower(trim((string)$object['chat'])) : '';
+$code = isset($object['chat'])
+	? strtolower(trim((string)$object['chat']))
+	: '';
 if (!preg_match('/^[0-9a-f]{8}$/', $code)) {
 	cb_error('bad chat code', 10);
 }
@@ -18,18 +20,17 @@ $date = isset($object['date']) && (int)$object['date'] > 0
 	: time();
 
 $title = isset($object['title']) ? trim((string)$object['title']) : '';
-$link  = isset($object['link'])  ? trim((string)$object['link'])  : '';
 
 Db::exec(
 	"INSERT INTO `userbot_bind` " .
-	"(`platform`, `id_user`, `code`, `date`, `id_chat`, `title`, `link`) " .
-	"VALUES ('tg', ?, ?, ?, ?, ?, ?) " .
+	"(`platform`, `id_user`, `code`, `date`, `id_chat`, `title`) " .
+	"VALUES ('tg', ?, ?, ?, ?, ?) " .
 	"ON DUPLICATE KEY UPDATE " .
 	"`date` = VALUES(`date`), " .
 	"`id_chat` = VALUES(`id_chat`), " .
-	"`title` = IF(VALUES(`title`) != '', VALUES(`title`), `title`) " .
-	'isiiss',
-	[$user_id, $code, $date, $id_chat, $title, $link]
+	"`title` = IF(VALUES(`title`) != '', VALUES(`title`), `title`)",
+	'isiis',
+	[$user_id, $code, $date, $id_chat, $title]
 );
 
 $u_row = Db::selectOne(
@@ -37,7 +38,9 @@ $u_row = Db::selectOne(
 	'i',
 	[$user_id]
 );
-$lang = ($u_row && !empty($u_row['lng_code'])) ? (string)$u_row['lng_code'] : '';
+$lang = ($u_row && !empty($u_row['lng_code']))
+	? (string)$u_row['lng_code']
+	: '';
 
 if ($lang !== '') {
 	cb_ok([
