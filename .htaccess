@@ -1,0 +1,9 @@
+## Кодування документів
+AddDefaultCharset utf-8
+DirectoryIndex cb.php
+IndexIgnore *.bak
+Options -Indexes
+
+<FilesMatch "^\.">
+	Require all denied
+</FilesMatch>

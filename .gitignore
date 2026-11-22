@@ -1,0 +1,11 @@
+# Конфіг з паролем від бази та маркер інсталяції
+db/conf.php
+db/.installed
+
+# Бекапи та тимчасові файли редакторів (Notepad2, Total Commander тощо)
+*.bak
+*.tmp
+*.log
+*Коп*
+Thumbs.db
+desktop.ini
