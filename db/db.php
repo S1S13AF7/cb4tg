@@ -66,7 +66,7 @@ class Db {
 
 	public static function selectOne($sql, $types = '', $params = []) {
 		$rows = self::select($sql, $types, $params);
-		return isset($rows) ? $rows : null;
+		return isset($rows[0]) ? $rows[0] : null;
 	}
 
 	public static function exec($sql, $types = '', $params = []) {
