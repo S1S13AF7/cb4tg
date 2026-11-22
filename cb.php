@@ -18,10 +18,6 @@ function cb_error($msg, $code = 1) {
 	exit;
 }
 
-if (!preg_match('/^[a-zA-Z][a-zA-Z0-9]{7,}$/', $secret)) {
-	cb_error('bad secret format', 3);
-}
-
 function cb_ok($data = 'ok') {
 	echo json_encode([
 		'response' => $data
@@ -55,7 +51,7 @@ function cb_resolve($method) {
 }
 
 function cb_auth($user_id, $secret) {
-	if ($user_id <= 0 || !preg_match('/^[a-zA-Z0-9]{8,30}$/', $secret)) {
+	if ($user_id <= 0 || !preg_match('/^[a-zA-Z][a-zA-Z0-9]{7,30}$/', $secret)) {
 		return null;
 	}
 	$row = Db::selectOne(
@@ -91,7 +87,9 @@ if (!is_array($data) || empty($data['method'])) {
 }
 
 $method  = preg_replace('/[^a-zA-Z0-9_.-]/', '', (string)$data['method']);
-$user_id = isset($data['user_id']) ? (int)$data['user_id'] : 0;
+$user_id = isset($data['user_id'])
+	? (int)$data['user_id']
+	: (isset($data['id']) ? (int)$data['id'] : 0);
 $secret  = isset($data['secret']) ? trim((string)$data['secret']) : '';
 $object  = isset($data['object']) && is_array($data['object']) ? $data['object'] : [];
 $message = isset($data['message']) && is_array($data['message']) ? $data['message'] : null;
@@ -101,9 +99,7 @@ if (!$handler) {
 	cb_error('no method found', 2);
 }
 
-if ($method === 'ping') {
-if(!empty($object['check_auth'])) 
-{ cb_require_trusted($userbot); }
+if ($method === 'ping' && empty($object['check_auth'])) {
 	require_once($handler);
 	exit;
 }
@@ -114,10 +110,19 @@ if (!Db::link()) {
 
 $userbot = null;
 if ($secret !== '') {
+	if (!preg_match('/^[a-zA-Z][a-zA-Z0-9]{7,30}$/', $secret)) {
+		cb_error('bad secret format', 3);
+	}
 	$userbot = cb_auth($user_id, $secret);
 	if (!$userbot) {
 		cb_error('wrong secret or no such user', 3);
 	}
+}
+
+if ($method === 'ping') {
+	cb_require_trusted($userbot);
+	require_once($handler);
+	exit;
 }
 
 require_once($handler);
