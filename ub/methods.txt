@@ -1,4 +1,5 @@
 #методи:					метод
 ping						ping
 bind						bind
+noeb						noeb
 signal						signal
