@@ -22,7 +22,7 @@ $server_noeb = $default_noeb;
 if (is_file($noeb_path)) {
 	$raw_json = json_decode((string)file_get_contents($noeb_path), true);
 	if (is_array($raw_json)) {
-		$server_noeb = array_values(array_unique(array_map('intval',$raw_json)));
+		$server_noeb = array_values(array_unique(array_map('intval', $raw_json)));
 	}
 } else {
 	file_put_contents(
@@ -32,11 +32,28 @@ if (is_file($noeb_path)) {
 	);
 }
 
-$in_noeb = $object['noeb'] ?? ($data['noeb'] ?? []);
-if (is_string($in_noeb)) {
-	$in_noeb = json_decode($in_noeb, true) ?: [];
+$in_noeb = $object['noeb'] ?? ($data['noeb'] ?? null);
+if (is_string($in_noeb) && strlen($in_noeb) > 0 && $in_noeb[0] === '[') {
+	$in_noeb = json_decode($in_noeb, true);
 }
 
+$is_rw = !empty($userbot) && (string)($userbot['trusted'] ?? '0') === '1';
+
+// Якщо передано ОДИН ID (числом) і клієнт trusted — тихо записуємо на сервер
+if (!is_array($in_noeb) && is_numeric($in_noeb)) {
+	$one_id = (int)$in_noeb;
+	if ($is_rw && $one_id > 0 && !in_array($one_id, $server_noeb, true)) {
+		$server_noeb[] = $one_id;
+		file_put_contents(
+			$noeb_path,
+			json_encode($server_noeb, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+			LOCK_EX
+		);
+	}
+	cb_ok('ok');
+}
+
+// Якщо передано масив або пусто — віддаємо весь список або різницю
 $client_noeb = [];
 if (is_array($in_noeb)) {
 	foreach ($in_noeb as $id) {
@@ -48,29 +65,11 @@ if (is_array($in_noeb)) {
 	$client_noeb = array_values(array_unique($client_noeb));
 }
 
-$is_rw = !empty($userbot) && (string)($userbot['trusted'] ?? '0') === '1';
-$added_count = 0;
-
-if ($is_rw && !empty($client_noeb)) {
-	$new_ids = array_values(array_diff($client_noeb, $server_noeb));
-	if (!empty($new_ids)) {
-		$server_noeb = array_values(array_unique(array_merge($server_noeb, $new_ids)));
-		$added_count = count($new_ids);
-		file_put_contents(
-			$noeb_path,
-			json_encode($server_noeb, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
-			LOCK_EX
-		);
-	}
-}
-
 $diff_for_client = empty($client_noeb)
 	? $server_noeb
 	: array_values(array_diff($server_noeb, $client_noeb));
 
 cb_ok([
-	'mode'  => $is_rw ? 'rw' : 'ro',
 	'noeb'  => $diff_for_client,
-	'added' => $added_count,
 	'total' => count($server_noeb)
 ]);
