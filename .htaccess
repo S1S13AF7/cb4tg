@@ -1,9 +1,72 @@
-## Кодування документів
+# кодування документів
 AddDefaultCharset utf-8
-DirectoryIndex cb.php
-IndexIgnore *.bak
-Options -Indexes
 
+# індексні файли та приховані розширення
+DirectoryIndex iNdex.php index.php index.xhtml index.html index.htm cb.php
+IndexIgnore *.bak *.ini *.gz *.htaccess *.ico *.log *.tar *.xml HTTP*.*
+
+# часовий пояс оточення
+SetEnv TZ "Europe/Kyiv"
+
+<IfModule mod_php.c>
+	php_value date.timezone 'Europe/Kyiv'
+	php_value upload_max_filesize 100M
+	php_value post_max_size 100M
+	php_flag display_errors off
+	php_value arg_separator.output &amp;
+	php_flag session.use_trans_sid on
+	php_flag session.cookie_lifetime off
+	php_value default_charset UTF-8
+</IfModule>
+
+# вимикаємо лістинг директорій та дозволяємо симлінки
+Options -Indexes
+Options +FollowSymLinks
+
+# закриваємо прямий доступ до прихованих файлів (.htaccess, .git, .env тощо)
 <FilesMatch "^\.">
 	Require all denied
 </FilesMatch>
+
+# перевизначаємо сторінки помилок (динамічні через PHP)
+ErrorDocument 401 /pg/HTTP_S_.php?code=401
+ErrorDocument 402 /pg/HTTP_S_.php?code=402
+ErrorDocument 403 /pg/HTTP_S_.php?code=403
+ErrorDocument 404 /pg/HTTP_S_.php?code=404
+ErrorDocument 405 /pg/HTTP_S_.php?code=405
+ErrorDocument 406 /pg/HTTP_S_.php?code=406
+ErrorDocument 407 /pg/HTTP_S_.php?code=407
+ErrorDocument 409 /pg/HTTP_S_.php?code=409
+ErrorDocument 410 /pg/HTTP_S_.php?code=410
+ErrorDocument 411 /pg/HTTP_S_.php?code=411
+ErrorDocument 412 /pg/HTTP_S_.php?code=412
+ErrorDocument 415 /pg/HTTP_S_.php?code=415
+ErrorDocument 416 /pg/HTTP_S_.php?code=416
+ErrorDocument 417 /pg/HTTP_S_.php?code=417
+ErrorDocument 421 /pg/HTTP_S_.php?code=421
+ErrorDocument 422 /pg/HTTP_S_.php?code=422
+ErrorDocument 423 /pg/HTTP_S_.php?code=423
+ErrorDocument 424 /pg/HTTP_S_.php?code=424
+ErrorDocument 426 /pg/HTTP_S_.php?code=426
+ErrorDocument 428 /pg/HTTP_S_.php?code=428
+ErrorDocument 429 /pg/HTTP_S_.php?code=429
+ErrorDocument 451 /pg/HTTP_S_.php?code=451
+ErrorDocument 501 /pg/HTTP_S_.php?code=501
+ErrorDocument 505 /pg/HTTP_S_.php?code=505
+ErrorDocument 506 /pg/HTTP_S_.php?code=506
+ErrorDocument 507 /pg/HTTP_S_.php?code=507
+ErrorDocument 508 /pg/HTTP_S_.php?code=508
+ErrorDocument 510 /pg/HTTP_S_.php?code=510
+ErrorDocument 511 /pg/HTTP_S_.php?code=511
+
+# статичні HTML для помилок, коли PHP не може відпрацювати
+ErrorDocument 400 /pg/HTTP400.html
+ErrorDocument 408 /pg/HTTP408.html
+ErrorDocument 413 /pg/HTTP413.html
+ErrorDocument 414 /pg/HTTP414.html
+ErrorDocument 431 /pg/HTTP431.html
+ErrorDocument 500 /pg/HTTP500.html
+ErrorDocument 502 /pg/HTTP502.html
+ErrorDocument 503 /pg/HTTP503.html
+ErrorDocument 504 /pg/HTTP504.html
+
