@@ -124,7 +124,7 @@ if ($__entry !== false && $__entry === $__self) {
 	// Пряме відкриття файлу як сторінки статусів
 	$code = isset($_GET['code']) ? (int)$_GET['code'] : 200;
 	render_http_status($code);
-} elseif ($__entry !== false && $__entry === $__caller) {
+} elseif (!defined('HS_ALLOW_DIRECT') && $__entry !== false && $__entry === $__caller) {
 	// Пряме відкриття файлу, який підключив цей модуль
 	render_http_status(403);
 }
