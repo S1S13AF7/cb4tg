@@ -28,6 +28,13 @@ function cb_error($msg, $code = 1) {
 	exit;
 }
 
+function cb_ok($data = 'ok') {
+	echo json_encode([
+		'response' => $data
+	], JSON_UNESCAPED_UNICODE);
+	exit;
+}
+
 function cb_resolve($method) {
 	$list = __DIR__ . '/ub/methods.txt';
 	if (!is_file($list)) {
