@@ -1,8 +1,18 @@
 <?php
-# кодуванння UTF-8
+# кодування UTF-8
 ini_set('display_errors', 0);
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
+
+if (!version_compare(PHP_VERSION, '7.0', '>=')) {
+	echo json_encode([
+		'error' => [
+			'error_code' => 500,
+			'error_msg'  => 'Потрібен PHP >= 7.0'
+		]
+	], JSON_UNESCAPED_UNICODE);
+	exit;
+}
 
 require_once(__DIR__ . '/db/db.php');
 
@@ -14,13 +24,6 @@ function cb_error($msg, $code = 1) {
 			'error_code' => (int)$code,
 			'error_msg'  => (string)$msg
 		]
-	], JSON_UNESCAPED_UNICODE);
-	exit;
-}
-
-function cb_ok($data = 'ok') {
-	echo json_encode([
-		'response' => $data
 	], JSON_UNESCAPED_UNICODE);
 	exit;
 }

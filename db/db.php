@@ -1,10 +1,12 @@
 <?php
-# кодуванння UTF-8
+# кодування UTF-8
+version_compare(PHP_VERSION, '7.0', '>=') or die('Потрібен PHP >= 7.0');
 require_once(__DIR__ . '/conf.php');
+
 class Db {
 	private static $conn = null;
 	
-		public static function link() {
+	public static function link() {
 		if (self::$conn === null) {
 			mysqli_report(MYSQLI_REPORT_OFF);
 			$db = @new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
@@ -55,7 +57,7 @@ class Db {
 		$stmt->close();
 		return $out;
 	}
-
+	
 	public static function select($sql, $types = '', $params = []) {
 		$res = self::run($sql, $types, $params);
 		if ($res instanceof mysqli_result) {
@@ -63,12 +65,12 @@ class Db {
 		}
 		return [];
 	}
-
+	
 	public static function selectOne($sql, $types = '', $params = []) {
 		$rows = self::select($sql, $types, $params);
 		return isset($rows[0]) ? $rows[0] : null;
 	}
-
+	
 	public static function exec($sql, $types = '', $params = []) {
 		$db = self::link();
 		if (!$db) {
