@@ -4,18 +4,36 @@ ini_set('display_errors', 0);
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 
-if (!version_compare(PHP_VERSION, '7.0', '>=')) {
+function cb_error($msg, $code = 1) {
+	while (ob_get_level() > 0) {
+		ob_end_clean();
+	}
 	echo json_encode([
 		'error' => [
-			'error_code' => 500,
-			'error_msg'  => 'Потрібен PHP >= 7.0'
+			'error_code' => (int)$code,
+			'error_msg'  => (string)$msg
 		]
 	], JSON_UNESCAPED_UNICODE);
 	exit;
 }
 
+function cb_ok($data = 'ok') {
+	while (ob_get_level() > 0) {
+		ob_end_clean();
+	}
+	echo json_encode([
+		'response' => $data
+	], JSON_UNESCAPED_UNICODE);
+	exit;
+}
+
+if (!version_compare(PHP_VERSION, '7.0', '>=')) {
+	cb_error('Потрібен PHP >= 7.0', 500);
+}
+
 $root = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\');
 $db_paths = [
+	__DIR__ . '/db/db.php',
 	__DIR__ . '/db/db.class.php',
 	__DIR__ . '/../sys/inc/db.class.php',
 	__DIR__ . '/../../sys/inc/db.class.php',
@@ -35,27 +53,19 @@ foreach ($db_paths as $db_file) {
 	}
 }
 
-########################################################################
-
-function cb_error($msg, $code = 1) {
-	echo json_encode([
-		'error' => [
-			'error_code' => (int)$code,
-			'error_msg'  => (string)$msg
-		]
-	], JSON_UNESCAPED_UNICODE);
-	exit;
-}
-
-function cb_ok($data = 'ok') {
-	echo json_encode([
-		'response' => $data
-	], JSON_UNESCAPED_UNICODE);
-	exit;
-}
-
 if (!$db_found) {
 	cb_error('Не знайдено модуль БД', 500);
+}
+
+if (!defined('DB_HOST') || !defined('DB_USER') || !defined('DB_PASS') || !defined('DB_NAME')) {
+	cb_error('Константи БД не визначені (перевір conf.php)', 500);
+}
+
+if (Db::link() === null) {
+	mysqli_report(MYSQLI_REPORT_OFF);
+	$probe = @new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+	$err = $probe->connect_errno ? $probe->connect_error : 'Невідома помилка підключення';
+	cb_error('Помилка підключення до БД: ' . $err, 500);
 }
 
 function cb_resolve($method) {
