@@ -54,8 +54,15 @@ class Db {
 			while (self::$conn->more_results()) {
 				self::$conn->next_result();
 			}
-			$stamp="<?php\n# кодування UTF-8\n# signed: " . 
-			date('Y-m-d H:i:s') . ' (' . time() . ")\n";
+			$stamp = "<?php\n"
+			. "# кодування UTF-8\n"
+			. "# signed: " . date('Y-m-d H:i:s') . ' (' . time() . ")\n"
+			. "header((\$_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1') . ' 403 Forbidden', true, 403);\n"
+			. "header('Content-Type: application/json; charset=utf-8', true);\n"
+			. "echo json_encode(['error' => 
+			['error_code' => 403, 'error_msg' => 'Forbidden']
+			], JSON_UNESCAPED_UNICODE);\n"
+			. "exit;\n";
 			@file_put_contents($lock, $stamp);
 		}
 	}
