@@ -1,10 +1,8 @@
 <?php
 # кодування UTF-8
+
 /* Захист від прямого доступу */
-$guard_file = __DIR__ . '/hs.php';
-if (is_file($guard_file)) {
-	require_once $guard_file;
-} elseif (realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === realpath(__FILE__)) {
+if (realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === realpath(__FILE__)) {
 	header(($_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1') . ' 403 Forbidden', true, 403);
 	header('Content-Type: text/plain; charset=utf-8', true);
 	exit('403 Forbidden');
@@ -12,32 +10,17 @@ if (is_file($guard_file)) {
 
 version_compare(PHP_VERSION, '7.0', '>=') or die('Потрібен PHP >= 7.0');
 
-/* Пошук конфігурації БД: спочатку conf.php (поруч — пріоритет), далі фолбек на conf.example.php */
-$root = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\');
-$conf_dirs = [
-	__DIR__,
-	__DIR__ . '/../tg/cb4tg/db',
-	__DIR__ . '/../tg/cb4tg',
-	__DIR__ . '/../cb4tg/db',
-	__DIR__ . '/../cb4tg',
-];
-if ($root !== '') {
-	$conf_dirs[] = $root . '/tg/cb4tg/db';
-	$conf_dirs[] = $root . '/tg/cb4tg';
-	$conf_dirs[] = $root . '/cb4tg/db';
-	$conf_dirs[] = $root . '/cb4tg';
-}
+/* Підключення конфігурації БД поруч із файлом */
+$conf_main = __DIR__ . '/conf.php';
+$conf_example = __DIR__ . '/conf.example.php';
 
-$conf_loaded = false;
-foreach (['conf.php', 'conf.example.php'] as $conf_name) {
-	foreach ($conf_dirs as $c_dir) {
-		$candidate = $c_dir . '/' . $conf_name;
-		if (is_file($candidate)) {
-			require_once $candidate;
-			$conf_loaded = true;
-			break 2;
-		}
-	}
+if (is_file($conf_main)) {
+	require_once $conf_main;
+} elseif (is_file($conf_example)) {
+	require_once $conf_example;
+} else {
+	header('Content-Type: text/plain; charset=utf-8', true);
+	exit('Конфіг не знайдено');
 }
 
 class Db {
