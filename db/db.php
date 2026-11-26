@@ -11,13 +11,43 @@ if (is_file($guard_file)) {
 }
 
 version_compare(PHP_VERSION, '7.0', '>=') or die('Потрібен PHP >= 7.0');
-require_once(__DIR__ . '/conf.php');
+
+/* Пошук конфігурації БД: спочатку conf.php (поруч — пріоритет), далі фолбек на conf.example.php */
+$root = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\');
+$conf_dirs = [
+	__DIR__,
+	__DIR__ . '/../tg/cb4tg/db',
+	__DIR__ . '/../tg/cb4tg',
+	__DIR__ . '/../cb4tg/db',
+	__DIR__ . '/../cb4tg',
+];
+if ($root !== '') {
+	$conf_dirs[] = $root . '/tg/cb4tg/db';
+	$conf_dirs[] = $root . '/tg/cb4tg';
+	$conf_dirs[] = $root . '/cb4tg/db';
+	$conf_dirs[] = $root . '/cb4tg';
+}
+
+$conf_loaded = false;
+foreach (['conf.php', 'conf.example.php'] as $conf_name) {
+	foreach ($conf_dirs as $c_dir) {
+		$candidate = $c_dir . '/' . $conf_name;
+		if (is_file($candidate)) {
+			require_once $candidate;
+			$conf_loaded = true;
+			break 2;
+		}
+	}
+}
 
 class Db {
 	private static $conn = null;
 	
 	public static function link() {
 		if (self::$conn === null) {
+			if (!defined('DB_HOST') || !defined('DB_USER') || !defined('DB_PASS') || !defined('DB_NAME')) {
+				return null;
+			}
 			mysqli_report(MYSQLI_REPORT_OFF);
 			$db = @new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 			if ($db->connect_errno) {
