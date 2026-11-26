@@ -1,6 +1,7 @@
 <?php
 # кодування UTF-8
 ini_set('display_errors', 0);
+ob_start();
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 
