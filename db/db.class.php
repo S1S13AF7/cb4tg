@@ -44,7 +44,7 @@ class Db {
 	}
 	
 	private static function install() {
-		$lock = __DIR__ . '/.installed';
+		$lock = __DIR__ . '/.installed.php';
 		$sql_file = __DIR__ . '/db.sql';
 		if (is_file($lock) || !is_file($sql_file) || !self::$conn) {
 			return;
@@ -54,7 +54,9 @@ class Db {
 			while (self::$conn->more_results()) {
 				self::$conn->next_result();
 			}
-			@file_put_contents($lock, (string)time());
+			$stamp="<?php\n# кодування UTF-8\n# signed: " . 
+			date('Y-m-d H:i:s') . ' (' . time() . ")\n";
+			@file_put_contents($lock, $stamp);
 		}
 	}
 	
