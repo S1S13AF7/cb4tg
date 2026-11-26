@@ -1,6 +1,9 @@
 # Конфіг з паролем від бази та маркер інсталяції
 db/conf.php
+db/.installed.php
 db/.installed
+cb.json
+
 
 # Бекапи та тимчасові файли редакторів (Notepad2, Total Commander тощо)
 *.bak
