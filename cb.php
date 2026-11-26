@@ -14,7 +14,26 @@ if (!version_compare(PHP_VERSION, '7.0', '>=')) {
 	exit;
 }
 
-require_once(__DIR__ . '/db/db.php');
+$root = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\');
+$db_paths = [
+	__DIR__ . '/db/db.class.php',
+	__DIR__ . '/../sys/inc/db.class.php',
+	__DIR__ . '/../../sys/inc/db.class.php',
+];
+if ($root !== '') {
+	$db_paths[] = $root . '/sys/inc/db.class.php';
+}
+
+$db_found = false;
+foreach ($db_paths as $db_file) {
+	if (is_file($db_file)) {
+		require_once $db_file;
+		if (class_exists('Db')) {
+			$db_found = true;
+			break;
+		}
+	}
+}
 
 ########################################################################
 
@@ -33,6 +52,10 @@ function cb_ok($data = 'ok') {
 		'response' => $data
 	], JSON_UNESCAPED_UNICODE);
 	exit;
+}
+
+if (!$db_found) {
+	cb_error('Не знайдено модуль БД', 500);
 }
 
 function cb_resolve($method) {
